@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+version: '3.9'
+
+>>>>>>> 75f83eecc9e9613579c37fd632041528d553a53d
 services:
   frontend:
     build:
@@ -6,6 +11,7 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+<<<<<<< HEAD
 
   longan-map:
     build:
@@ -14,3 +20,5 @@ services:
     ports:
       - "8081:80"
     restart: unless-stopped
+=======
+>>>>>>> 75f83eecc9e9613579c37fd632041528d553a53d
