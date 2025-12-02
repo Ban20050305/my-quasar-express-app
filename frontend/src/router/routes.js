@@ -1,9 +1,16 @@
 const routes = [
   {
     path: '/',
-    beforeEnter() {
-      window.location.href = '/longan-map/longan_map.html'
-    }
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/IndexPage.vue') }
+    ]
+  },
+
+  // ⚠️ ไว้ท้ายสุดเสมอ!
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/ErrorNotFound.vue')
   }
 ]
 
