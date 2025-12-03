@@ -26,8 +26,11 @@ app.get('/api/demo', (req, res) => {
   const logMessage = `Request at ${new Date().toISOString()}: ${req.ip}\n`;
   fs.appendFileSync(path.join(logsDir, 'access.log'), logMessage);
 
-
   res.json({
+    owner: {
+      name: "บัณฑิตา สุริยะ",
+      studentId: "6604101345"
+    },
     git: {
       title: 'Advanced Git Workflow',
       detail: 'ใช้ branch protection บน GitHub, code review ใน PR, และ squash merge เพื่อ history สะอาด'
@@ -38,6 +41,7 @@ app.get('/api/demo', (req, res) => {
     }
   });
 });
+
 
 
 // Error handling

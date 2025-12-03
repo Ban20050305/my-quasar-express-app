@@ -4,7 +4,36 @@
       Advanced Full-Stack Demo (Quasar + Express)
     </div>
 
-    <!-- Git Workflow (จากตัวอย่างก่อน) -->
+    <!-- Student Info -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-h6">Student Info</div>
+
+        <q-spinner v-if="loading" color="primary" size="2em" />
+
+        <q-list v-else bordered separator class="q-mt-sm">
+          <q-item>
+            <q-item-section>
+              <q-item-label>ชื่อผู้พัฒนา</q-item-label>
+              <q-item-label caption>
+                {{ apiData.owner?.name }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section>
+              <q-item-label>รหัสนักศึกษา</q-item-label>
+              <q-item-label caption>
+                {{ apiData.owner?.studentId }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+    </q-card>
+
+    <!-- Git Workflow -->
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="text-h6">Git Workflow</div>
@@ -22,7 +51,7 @@
       </q-card-section>
     </q-card>
 
-    <!-- Docker Concepts (จากตัวอย่างก่อน) -->
+    <!-- Docker Concepts -->
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="text-h6">Docker Concepts</div>
@@ -37,11 +66,12 @@
       </q-card-section>
     </q-card>
 
-    <!-- New: API Data from Backend -->
+    <!-- API Data -->
     <q-card>
       <q-card-section>
         <div class="text-h6">Data from Backend API</div>
         <q-spinner v-if="loading" color="primary" size="2em" />
+
         <q-list v-else bordered separator class="q-mt-sm">
           <q-item>
             <q-item-section>
@@ -49,6 +79,7 @@
               <q-item-label caption>{{ apiData.git.detail }}</q-item-label>
             </q-item-section>
           </q-item>
+
           <q-item>
             <q-item-section>
               <q-item-label>Advanced Docker</q-item-label>
@@ -56,9 +87,10 @@
             </q-item-section>
           </q-item>
         </q-list>
-        <q-btn v-if="!loading" color="primary" @click="fetchData"
-          >Refresh Data</q-btn
-        >
+
+        <q-btn v-if="!loading" color="primary" @click="fetchData">
+          Refresh Data
+        </q-btn>
       </q-card-section>
     </q-card>
   </q-page>
@@ -68,17 +100,17 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-// จากตัวอย่างก่อน
+// Git Workflow
 const gitSteps = [
-  /* ... (same as before) */
   {
     title: "Advanced Git Workflow",
     detail:
       "ใช้ branch protection บน GitHub, code review ใน PR, และ squash merge เพื่อ history สะอาด",
   },
 ];
+
+// Docker Concepts
 const dockerItems = [
-  /* ... (same as before) */
   {
     title: "Advanced Docker",
     detail:
@@ -86,7 +118,7 @@ const dockerItems = [
   },
 ];
 
-const apiData = ref({ git: {}, docker: {} });
+const apiData = ref({ owner: {}, git: {}, docker: {} });
 const loading = ref(true);
 
 const fetchData = async () => {
