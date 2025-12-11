@@ -5,3 +5,5 @@ logs/
 # Backend
 backend/logs/
 
+
+/generated/prisma
