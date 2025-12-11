@@ -1,139 +1,70 @@
 <template>
   <q-page padding>
     <div class="text-h4 q-mb-md">
-      Advanced Full-Stack Demo (Quasar + Express)
+      Task List (Express + Prisma + Supabase)
     </div>
 
-    <!-- Student Info -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Student Info</div>
+    <div class="q-mb-md row items-center q-gutter-sm">
+      <q-btn
+        color="primary"
+        label="Reload Tasks"
+        :loading="loading"
+        @click="fetchTasks"
+      />
+      <span v-if="errorMessage" class="text-negative">
+        {{ errorMessage }}
+      </span>
+    </div>
 
-        <q-spinner v-if="loading" color="primary" size="2em" />
+    <q-spinner v-if="loading" color="primary" size="2em" />
 
-        <q-list v-else bordered separator class="q-mt-sm">
-          <q-item>
-            <q-item-section>
-              <q-item-label>ชื่อผู้พัฒนา</q-item-label>
-              <q-item-label caption>
-                {{ apiData.owner?.name }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+    <div v-else>
+      <div v-if="tasks.length === 0" class="text-grey">
+        ยังไม่มีงานในระบบ ลองสร้างด้วย curl / Postman ก่อน
+      </div>
 
-          <q-item>
-            <q-item-section>
-              <q-item-label>รหัสนักศึกษา</q-item-label>
-              <q-item-label caption>
-                {{ apiData.owner?.studentId }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
-
-    <!-- Git Workflow -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Git Workflow</div>
-        <q-list bordered separator class="q-mt-sm">
-          <q-item v-for="(step, index) in gitSteps" :key="index">
-            <q-item-section avatar>
-              <q-badge>{{ index + 1 }}</q-badge>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ step.title }}</q-item-label>
-              <q-item-label caption>{{ step.detail }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
-
-    <!-- Docker Concepts -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Docker Concepts</div>
-        <q-list bordered separator class="q-mt-sm">
-          <q-item v-for="(item, index) in dockerItems" :key="index">
-            <q-item-section>
-              <q-item-label>{{ item.title }}</q-item-label>
-              <q-item-label caption>{{ item.detail }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
-
-    <!-- API Data -->
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Data from Backend API</div>
-        <q-spinner v-if="loading" color="primary" size="2em" />
-
-        <q-list v-else bordered separator class="q-mt-sm">
-          <q-item>
-            <q-item-section>
-              <q-item-label>Advanced Git</q-item-label>
-              <q-item-label caption>{{ apiData.git.detail }}</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item>
-            <q-item-section>
-              <q-item-label>Advanced Docker</q-item-label>
-              <q-item-label caption>{{ apiData.docker.detail }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-
-        <q-btn v-if="!loading" color="primary" @click="fetchData">
-          Refresh Data
-        </q-btn>
-      </q-card-section>
-    </q-card>
+      <q-list v-else bordered separator>
+        <q-item v-for="task in tasks" :key="task.id">
+          <q-item-section>
+            <q-item-label>{{ task.title }}</q-item-label>
+            <q-item-label caption>{{ task.description }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-item-label caption>
+              {{ new Date(task.createdAt).toLocaleString() }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-// Git Workflow
-const gitSteps = [
-  {
-    title: "Advanced Git Workflow",
-    detail:
-      "ใช้ branch protection บน GitHub, code review ใน PR, และ squash merge เพื่อ history สะอาด",
-  },
-];
+// อ่านค่าจาก quasar.config → env.API_URL
+const API_URL = process.env.API_URL || 'http://localhost:3000';
 
-// Docker Concepts
-const dockerItems = [
-  {
-    title: "Advanced Docker",
-    detail:
-      "ใช้ multi-stage build, healthcheck ใน Dockerfile, และ orchestration ด้วย Compose/Swarm",
-  },
-];
+const tasks = ref([]);
+const loading = ref(false);
+const errorMessage = ref('');
 
-const apiData = ref({ owner: {}, git: {}, docker: {} });
-const loading = ref(true);
-
-const fetchData = async () => {
+const fetchTasks = async () => {
   loading.value = true;
+  errorMessage.value = '';
+
   try {
-    const response = await axios.get(
-      import.meta.env.VITE_API_URL + "/api/demo"
-    );
-    apiData.value = response.data;
-  } catch (error) {
-    console.error("API Error:", error);
+    const res = await axios.get(API_URL + '/api/tasks');
+    tasks.value = res.data.data; // backend ส่ง { data: [...] }
+  } catch (err) {
+    console.error('API /api/tasks error:', err);
+    errorMessage.value = 'โหลดงานจากฐานข้อมูลไม่สำเร็จ';
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchData);
+onMounted(fetchTasks);
 </script>
