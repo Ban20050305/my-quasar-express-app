@@ -1,13 +1,18 @@
-import 'dotenv/config'; // โหลด .env ให้ process.env ใช้งานได้
+// backend/src/prisma.ts
+import { config } from 'dotenv';
+config(); // โหลด .env ใน local dev
+
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-// ใช้ DATABASE_URL จาก .env
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set');
+}
+
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: process.env.DATABASE_URL,
 });
 
-// ทำ global singleton ป้องกัน new PrismaClient บ่อย ๆ ตอน dev (nodemon reload)
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
@@ -15,7 +20,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter, // 👈 สำคัญสำหรับ Prisma 7 + Postgres
+    adapter,
     log: ['query', 'info', 'warn', 'error'],
   });
 

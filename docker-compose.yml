@@ -7,6 +7,8 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+    networks:
+      - app-network
 
   longan-map:
     build:
@@ -15,26 +17,33 @@ services:
     ports:
       - "8081:80"
     restart: unless-stopped
+    networks:
+      - app-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        # ส่ง DATABASE_URL ไปใช้ตอน build
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL:-${DATABASE_URL}}  # ใช้ค่าเดียวกันถ้าไม่มี DIRECT_URL
     ports:
       - "3000:3000"
-    environment:
-      - PORT=3000
+    env_file:
+      - ./backend/.env  # ใช้ตอน runtime
     volumes:
-      - ./backend/logs:/app/logs  # Persist logs
+      - ./backend/logs:/app/logs
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:  # จาก Dockerfile
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/demo"]
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
-
+      start_period: 10s
 
 networks:
-  app-network:  
+  app-network:
+    driver: bridge

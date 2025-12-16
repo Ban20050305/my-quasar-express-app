@@ -1,15 +1,12 @@
-// prisma/schema.prisma
-
-
-datasource db {
-  provider = "postgresql"
-}
-
+// backend/prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
-
+datasource db {
+  provider = "postgresql"
+  // ❌ ลบ url และ directUrl ออก (Prisma 7 ไม่อนุญาต)
+}
 
 model Task {
   id          String   @id @default(uuid())

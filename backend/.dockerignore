@@ -1,6 +1,10 @@
+# backend/.dockerignore
 node_modules
-logs
+dist
 .git
 .gitignore
+*.log
+.env  # ✅ ignore .env เพราะใช้ env_file แทน
 npm-debug.log*
-.env
+yarn-debug.log*
+.DS_Store
